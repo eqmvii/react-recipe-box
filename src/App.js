@@ -1,27 +1,46 @@
 import React from 'react';
 
 // debug mode console logging
-var dbm = true;
+// var dbm = true;
 
+// Turns a string of ingredients into an array of ingredients
 function listify(stringData) {
   var arrayed = stringData.split(", ");
-  dbm ? console.log("Arrayed: ") : null;
-  console.log(arrayed);
+  // dbm ? console.log("Arrayed: ") : null;
+  // console.log(arrayed);
   return(arrayed);
   //var res = str.split(" ");
   //return ["test"];
 }
 
+// Turns an array of ingredients into a list of ingredients
 function listToString(arrayData){
   return arrayData.join(', ');
 }
 
+// App's title
 class TitleBox extends React.Component {
   render() {
     return <h2 className="text-center"><strong>{this.props.title}</strong></h2>;
   }
 }
 
+// Button to clear local browser history/cookies
+class MemoryClearingButton extends React.Component {
+  handleChange(event){
+    // console.log("Memory clearing button was clicked!");
+    localStorage.removeItem("recipeData");
+    location.reload();
+  }
+
+  render() {
+    return (
+      <button className="btn btn-danger" onClick={this.handleChange}>Clear Recipe Memory & Reload</button>
+    );
+  }
+}
+
+// Table of recipes, ingredients, and edit/delete buttons
 class RecipeTable extends React.Component {
   render() {
     var rows = [];
@@ -34,7 +53,7 @@ class RecipeTable extends React.Component {
       if (!recipes[a].edit)
       {
       builtRow = (
-        <tr>
+        <tr key={a}>
 
           <td className="text-center">
             {recipes[a].name}
@@ -42,7 +61,7 @@ class RecipeTable extends React.Component {
 
           <td>
             <ul>
-              {recipes[a].ingr.map(ingredient => <li>{ingredient}</li>)}
+              {recipes[a].ingr.map(ingredient => <li key={ingredient}>{ingredient}</li>)}
             </ul>
           </td>
 
@@ -69,9 +88,9 @@ class RecipeTable extends React.Component {
         </tr>
       );
     }
-    // If the row has the editable flag    
+    // If the row has the editable flag, replace display with text boxes to edit data    
     else {
-      builtRow = (<tr>
+      builtRow = (<tr key={a}>
         <td>
         <p className="text-center">Edit name:</p>
         <input
@@ -86,7 +105,7 @@ class RecipeTable extends React.Component {
           <input
               type="text"
               className="form-control"
-              id={"i" + a}
+              id={"z" + a}
               onChange={this.props.handleChange}
               value={listToString(recipes[a].ingr)}
             /></td>
@@ -104,7 +123,7 @@ class RecipeTable extends React.Component {
 
     }
 
-      // either way, push builtRow
+      // either way, push builtRow for later display
       rows.push(builtRow);
     }
     return (
@@ -122,14 +141,17 @@ class RecipeTable extends React.Component {
   }
 }
 
+// For later: figure out bootstrap form CSS, because of course it doesn't work exactly right
 class AddNewRecipeBox extends React.Component {
   render() {
     return (
       <div>
         <h3>Add a recipe to the box</h3>
+        <br />
         <form onSubmit={this.props.handleSubmit}>
           <div className="form-group">
-            <label for="Name">Recipe Name:</label>
+            <label htmlFor="rname" className="col-sm-8 control-label">Recipe Name:</label>
+            <div className="col-sm-8">
             <input
               type="text"
               className="form-control"
@@ -137,18 +159,23 @@ class AddNewRecipeBox extends React.Component {
               onChange={this.props.handleChange}
               value={this.props.rname}
             />
+            </div>
           </div>
           <div className="form-group">
-            <label for="ingr">Ingredients (separate multiple ingredients with a comma)</label>
-            <input
+            <label htmlFor="ingr" className="col-sm-8 control-label">Ingredients (separate multiple ingredients with a comma)</label>
+            <div className="col-sm-8">
+              <input
               type="text"
               className="form-control"
               id="ingr"
               onChange={this.props.handleChange}
               value={this.props.ingr}
             />
+            </div>
           </div>
+          <div className="form-group">
           <button type="submit" className="btn btn-primary">Submit</button>
+          </div>
         </form>
         <br />
 
@@ -170,7 +197,7 @@ class App extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    console.log("Submit pressed!");
+    // console.log("Submit pressed!");
 
     var oldList = this.state.data;
     //console.log("OldList: " + oldList[0]);
@@ -184,11 +211,12 @@ class App extends React.Component {
   }
 
   handleChange(event) {
+    var targetIndex, oldList;
     // Decide what to do based on the id of what was clicked.
     // event.preventDefault();
-    console.log("Handle Change was called!");
+    // console.log("Handle Change was called!");
     // console.log("rname is: " + event.target.value + ". ID is: " + event.target.id);
-    console.log(event.target.id + " was the event's id");
+    // console.log(event.target.id + " was the event's id");
     // If the event is entering a new recipe
     if (event.target.id === "rname") {
       this.setState({ rname: event.target.value });
@@ -197,51 +225,48 @@ class App extends React.Component {
       this.setState({ ingr: event.target.value });
     }
 
+
     // If the event is editing a recipe name:
     if (event.target.id[0] === "q") {
-      var targetIndex = parseInt(event.target.id[1], 10);
-      console.log("Recipe #" + (targetIndex +1) + " is being edited!");
-      var oldList = this.state.data.slice();
+      targetIndex = parseInt(event.target.id[1], 10);
+      // console.log("Recipe #" + (targetIndex +1) + " is being edited!");
+      oldList = this.state.data.slice();
       oldList[targetIndex].name = event.target.value;
       this.setState({data: oldList});
     }
 
       // If the event is editing a recipe ingredient list:
-      if (event.target.id[0] === "i") {
-        var targetIndex = parseInt(event.target.id[1], 10);
-        console.log("Recipe #" + (targetIndex +1) + " is being edited!");
-        var oldList = this.state.data.slice();
+      if (event.target.id[0] === "z") {
+        targetIndex = parseInt(event.target.id[1], 10);
+        // console.log("Recipe #" + (targetIndex +1) + " is being edited!");
+        oldList = this.state.data.slice();
         oldList[targetIndex].ingr = listify(event.target.value);
         this.setState({data: oldList});
       }
 
-
-
-
     // if the change was a delete request
     if (event.target.id[0] === "d") {
-      var targetIndex = parseInt(event.target.id[1], 10);
-      var oldList = this.state.data.slice();
-      console.log("Current list: ");
-      console.log(this.state.data);
+      targetIndex = parseInt(event.target.id[1], 10);
+      oldList = this.state.data.slice();
+      // console.log("Current list: ");
+      // console.log(this.state.data);
       oldList.splice(targetIndex, 1);
-      console.log("New list: ");
-      console.log(oldList);
+      // console.log("New list: ");
+      // console.log(oldList);
       this.setState({data: oldList});
       //this.setState({data: {}})
     }
     // if the change was an edit request
     if (event.target.id[0] === "e") {
-      var targetIndex = parseInt(event.target.id[1], 10);
+      targetIndex = parseInt(event.target.id[1], 10);
       // copy old state
-      var oldList = this.state.data.slice();
+      oldList = this.state.data.slice();
       // toggle editable flag
       oldList[targetIndex].edit = !oldList[targetIndex].edit;
       // save new state
       this.setState({data: oldList});
       
     }
-
   }
 
   render() {
@@ -260,19 +285,23 @@ class App extends React.Component {
           handleSubmit={this.handleSubmit}
           handleChange={this.handleChange}
         />
+        <br />
+        <div className="text-center">
+          <MemoryClearingButton className="text-center"/>
+        </div>
       </div>
     );
   }
 
+  // After any updates, persist data
   componentDidUpdate() {
-    console.log("Hello! My state change, and so I updated!");
+    //console.log("Hello! My state change, and so I updated!");
     // Check for localStorage object availibility, persist data if it exists
     if (typeof(Storage) !== "undefined") {
       localStorage.recipeData = JSON.stringify(this.state.data);
     }
   }
 }
-
 
 // make the app component available to the main app
 export default App;
