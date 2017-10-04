@@ -70,7 +70,7 @@ class AddNewRecipeBox extends React.Component {
   render() {
     return (
       <div>
-        <h3>Add a recipe:</h3>
+        <h3>Add a recipe to the box</h3>
         <form onSubmit={this.props.handleSubmit}>
           <div className="form-group">
             <label for="Name">Recipe Name:</label>
@@ -161,8 +161,8 @@ class App extends React.Component {
     return (
       <div>
         <br />
-        <TitleBox title="React Recipe Box" />
-        <h4 className="text-center">A recipebox app made using React!</h4>
+        <TitleBox title="Recipe Box" />
+        <h4 className="text-center">A recipe box app in React!</h4>
         <br />
         <RecipeTable data={this.state.data} handleChange={this.handleChange} />
         <AddNewRecipeBox
@@ -173,6 +173,14 @@ class App extends React.Component {
         />
       </div>
     );
+  }
+
+  componentDidUpdate() {
+    console.log("Hello! My state change, and so I updated!");
+    // Check for localStorage object availibility, persist data if it exists
+    if (typeof(Storage) !== "undefined") {
+      localStorage.recipeData = JSON.stringify(this.state.data);
+    }
   }
 }
 
