@@ -1,29 +1,39 @@
 import React from 'react';
 
+// debug mode console logging
+var dbm = true;
 
 function listify(stringData) {
   var arrayed = stringData.split(", ");
-  console.log("Arrayed: ");
+  dbm ? console.log("Arrayed: ") : null;
   console.log(arrayed);
   return(arrayed);
   //var res = str.split(" ");
   //return ["test"];
 }
 
+function listToString(arrayData){
+  return arrayData.join(', ');
+}
+
 class TitleBox extends React.Component {
   render() {
-    return <h3 className="text-center"><strong>{this.props.title}</strong></h3>;
+    return <h2 className="text-center"><strong>{this.props.title}</strong></h2>;
   }
 }
 
 class RecipeTable extends React.Component {
   render() {
     var rows = [];
+    var builtRow = "";
     var recipes = this.props.data;
     // build the rows from the data
     for (let a = 0; a < recipes.length; a++) {
       // console.log("Woah!");
-      var builtRow = (
+      // See if row is editable
+      if (!recipes[a].edit)
+      {
+      builtRow = (
         <tr>
 
           <td className="text-center">
@@ -36,7 +46,7 @@ class RecipeTable extends React.Component {
             </ul>
           </td>
 
-          <td className="text-center">
+          <td className="text-center">            
             <button
               type="button"
               className="btn btn-danger"
@@ -45,10 +55,56 @@ class RecipeTable extends React.Component {
             >
               Delete
             </button>
+            &nbsp;
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={this.props.handleChange}
+              id={"e" + a}
+            >
+              Edit
+            </button>
           </td>
 
         </tr>
       );
+    }
+    // If the row has the editable flag    
+    else {
+      builtRow = (<tr>
+        <td>
+        <p className="text-center">Edit name:</p>
+        <input
+              type="text"
+              className="form-control"
+              id={"q" + a}
+              onChange={this.props.handleChange}
+              value={recipes[a].name}
+            />
+          </td>
+        <td><p className="text-center">Edit ingredients (use commas):</p>
+          <input
+              type="text"
+              className="form-control"
+              id={"i" + a}
+              onChange={this.props.handleChange}
+              value={listToString(recipes[a].ingr)}
+            /></td>
+        <td className="text-center">            
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={this.props.handleChange}
+              id={"e" + a}
+            >
+              Submit edit
+            </button>
+          </td>         
+      </tr>);
+
+    }
+
+      // either way, push builtRow
       rows.push(builtRow);
     }
     return (
@@ -121,7 +177,7 @@ class App extends React.Component {
     // transform the ingredients list into an array
     var listo = listify(this.state.ingr);
     //console.log(listo);
-    oldList.push({ name: this.state.rname, ingr: listo });
+    oldList.push({ name: this.state.rname, ingr: listo, edit: false });
     //console.log("OldList: " + oldList[3].name);
     this.setState({ data: oldList, rname: "", ingr: "" });
     // alert("submit button pressed");
@@ -133,28 +189,59 @@ class App extends React.Component {
     console.log("Handle Change was called!");
     // console.log("rname is: " + event.target.value + ". ID is: " + event.target.id);
     console.log(event.target.id + " was the event's id");
+    // If the event is entering a new recipe
     if (event.target.id === "rname") {
       this.setState({ rname: event.target.value });
     }
     if (event.target.id === "ingr") {
       this.setState({ ingr: event.target.value });
     }
+
+    // If the event is editing a recipe name:
+    if (event.target.id[0] === "q") {
+      var targetIndex = parseInt(event.target.id[1], 10);
+      console.log("Recipe #" + (targetIndex +1) + " is being edited!");
+      var oldList = this.state.data.slice();
+      oldList[targetIndex].name = event.target.value;
+      this.setState({data: oldList});
+    }
+
+      // If the event is editing a recipe ingredient list:
+      if (event.target.id[0] === "i") {
+        var targetIndex = parseInt(event.target.id[1], 10);
+        console.log("Recipe #" + (targetIndex +1) + " is being edited!");
+        var oldList = this.state.data.slice();
+        oldList[targetIndex].ingr = listify(event.target.value);
+        this.setState({data: oldList});
+      }
+
+
+
+
     // if the change was a delete request
     if (event.target.id[0] === "d") {
       var targetIndex = parseInt(event.target.id[1], 10);
       var oldList = this.state.data.slice();
       console.log("Current list: ");
       console.log(this.state.data);
-     // console.log(oldList);
       oldList.splice(targetIndex, 1);
       console.log("New list: ");
       console.log(oldList);
       this.setState({data: oldList});
       //this.setState({data: {}})
     }
+    // if the change was an edit request
+    if (event.target.id[0] === "e") {
+      var targetIndex = parseInt(event.target.id[1], 10);
+      // copy old state
+      var oldList = this.state.data.slice();
+      // toggle editable flag
+      oldList[targetIndex].edit = !oldList[targetIndex].edit;
+      // save new state
+      this.setState({data: oldList});
+      
+    }
 
-    // if the event was the delete button being pressed
-    // delete!
   }
 
   render() {
@@ -162,7 +249,9 @@ class App extends React.Component {
       <div>
         <br />
         <TitleBox title="Recipe Box" />
-        <h4 className="text-center">A recipe box app in React!</h4>
+        <h5 className="text-center">A React app</h5>
+        <br />
+        <p className="text-center">Add, edit, or delete recipes. Recipes should persist in browser local storage (cookies).</p>
         <br />
         <RecipeTable data={this.state.data} handleChange={this.handleChange} />
         <AddNewRecipeBox

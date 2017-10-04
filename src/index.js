@@ -4,24 +4,30 @@ import App from './App';
 import './index.css';
 
 // debug console log messages toggle
-var dbm = false;
+var dbm = true;
 
 var recipeData = [
   {
     name: "Rice and Beans",
-    ingr: ["Rice", "Beans"]
+    ingr: ["Rice", "Beans"],
+    edit: false
   },
   {
     name: "Mediocre Spaghetti",
-    ingr: ["Spaghetti", "Sauce from a jar", "Frozen meatballs"]
+    ingr: ["Spaghetti", "Sauce from a jar", "Frozen meatballs"],
+    edit: false
   },
   {
     name: "Salad",
-    ingr: ["Lettuce", "Tomatoes", "Salad dressing"]
+    ingr: ["Lettuce", "Tomatoes", "Salad dressing"],
+    edit: false
   }
 ];
 
-//localStorage.removeItem("recipeData");
+// clear local storage to start fresh testing:
+// localStorage.removeItem("recipeData");
+ // comment out above line to persist data
+
 // Prep cookie-based recipe storage:
 if (typeof(Storage) !== "undefined") {
   if(localStorage.recipeData != null){

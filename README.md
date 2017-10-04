@@ -1,6 +1,15 @@
 A recipe box in react. It's a lot like a to-do list in react, only more fun, because instead it is a recipe box. 
 
-- - - - -
+
+## Console / deployment commands
+
+npm start
+
+git push heroku master
+
+
+## End of custom readme; begin create react app readme
+- - - - - - - - - - - - - - - - - 
 
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
