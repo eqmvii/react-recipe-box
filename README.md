@@ -1,3 +1,7 @@
+A recipe box in react. It's a lot like a to-do list in react, only more fun, because instead it is a recipe box. 
+
+- - - - -
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
